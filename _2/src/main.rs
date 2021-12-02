@@ -13,16 +13,17 @@ struct Position {
     depth: u64,
     aim: u64,
 }
-
-impl Position {
-    pub fn new() -> Self {
+impl Default for Position {
+    fn default() -> Self {
         Self {
             horizontal: 0,
             depth: 0,
             aim: 0,
         }
     }
+}
 
+impl Position {
     fn move_to_dir(&mut self, direction: Direction) {
         match direction {
             Direction::Forward(x) => {
@@ -60,7 +61,7 @@ fn main() {
     let file_name = "input.txt";
     let _file_name_test = "input.test";
     let content = fs::read_to_string(file_name).expect("something went wrong reading the file");
-    let mut position: Position = Position::new();
+    let mut position: Position = Position::default();
     content
         .lines()
         .map(|line| direction_from_str(line).unwrap())
