@@ -1,31 +1,41 @@
 use std::fs;
 
+#[derive(Debug, Clone)]
 enum Direction {
     Forward(u64),
     Up(u64),
     Down(u64),
 }
+
 #[derive(Debug)]
 struct Position {
-    x: u64,
-    y: u64,
+    horizontal: u64,
+    depth: u64,
+    aim: u64,
 }
 
 impl Position {
     pub fn new() -> Self {
-        Self { x: 0, y: 0 }
+        Self {
+            horizontal: 0,
+            depth: 0,
+            aim: 0,
+        }
     }
 
     fn move_to_dir(&mut self, direction: Direction) {
         match direction {
-            Direction::Forward(e) => self.x += e,
-            Direction::Up(e) => self.y -= e,
-            Direction::Down(e) => self.y += e,
+            Direction::Forward(x) => {
+                self.depth += self.aim * x;
+                self.horizontal += x;
+            }
+            Direction::Up(x) => self.aim -= x,
+            Direction::Down(x) => self.aim += x,
         }
     }
 
     fn dist_from_origin(&self) -> u64 {
-        self.x * self.y
+        self.horizontal * self.depth
     }
 }
 
@@ -48,6 +58,7 @@ fn direction_from_str(from: &str) -> Option<Direction> {
 
 fn main() {
     let file_name = "input.txt";
+    let _file_name_test = "input.test";
     let content = fs::read_to_string(file_name).expect("something went wrong reading the file");
     let directions: Vec<Direction> = content
         .lines()
@@ -55,7 +66,7 @@ fn main() {
         .collect();
     let mut position: Position = Position::new();
     for direction in directions {
-        position.move_to_dir(direction);
+        position.move_to_dir(direction.clone());
     }
     println!("{:?}", position.dist_from_origin());
 }
