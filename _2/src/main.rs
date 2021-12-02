@@ -60,13 +60,10 @@ fn main() {
     let file_name = "input.txt";
     let _file_name_test = "input.test";
     let content = fs::read_to_string(file_name).expect("something went wrong reading the file");
-    let directions: Vec<Direction> = content
+    let mut position: Position = Position::new();
+    content
         .lines()
         .map(|line| direction_from_str(line).unwrap())
-        .collect();
-    let mut position: Position = Position::new();
-    for direction in directions {
-        position.move_to_dir(direction.clone());
-    }
+        .for_each(|direction| position.move_to_dir(direction));
     println!("{:?}", position.dist_from_origin());
 }
