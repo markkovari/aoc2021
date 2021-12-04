@@ -1,3 +1,6 @@
+use std::num::ParseIntError;
+use std::str::FromStr;
+
 #[derive(Debug)]
 struct Elem(u8, bool);
 
@@ -6,6 +9,14 @@ struct Row(Vec<Elem>, bool);
 
 #[derive(Debug)]
 struct Table(Vec<Row>, bool);
+
+impl FromStr for Elem {
+    type Err = ParseIntError;
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let num = s.parse::<u8>()?;
+        Ok(Elem(num, false))
+    }
+}
 
 fn main() {
     let content = include_str!("../input.test")
@@ -27,8 +38,7 @@ fn main() {
                     .map(|row| {
                         Row(
                             row.split(" ")
-                                .filter_map(|elem| elem.parse::<u8>().ok())
-                                .map(|e| Elem(e, false))
+                                .filter_map(|elem| Elem::from_str(elem).ok())
                                 .collect::<Vec<Elem>>(),
                             false,
                         )
