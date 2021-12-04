@@ -4,12 +4,6 @@ use std::str::FromStr;
 #[derive(Debug)]
 struct Elem(u8, bool);
 
-#[derive(Debug)]
-struct Row(Vec<Elem>, bool);
-
-#[derive(Debug)]
-struct Table(Vec<Row>, bool);
-
 impl FromStr for Elem {
     type Err = ParseIntError;
     fn from_str(s: &str) -> Result<Self, Self::Err> {
@@ -17,6 +11,23 @@ impl FromStr for Elem {
         Ok(Elem(num, false))
     }
 }
+
+#[derive(Debug)]
+struct Row(Vec<Elem>, bool);
+
+impl FromStr for Row {
+    type Err = ParseIntError;
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let elements = s
+            .split(" ")
+            .filter_map(|elem| Elem::from_str(elem).ok())
+            .collect::<Vec<Elem>>();
+        Ok(Row(elements, false))
+    }
+}
+
+#[derive(Debug)]
+struct Table(Vec<Row>, bool);
 
 fn main() {
     let content = include_str!("../input.test")
@@ -35,14 +46,7 @@ fn main() {
             Table(
                 table
                     .split("\n")
-                    .map(|row| {
-                        Row(
-                            row.split(" ")
-                                .filter_map(|elem| Elem::from_str(elem).ok())
-                                .collect::<Vec<Elem>>(),
-                            false,
-                        )
-                    })
+                    .filter_map(|row| Row::from_str(row).ok())
                     .collect::<Vec<Row>>(),
                 false,
             )
