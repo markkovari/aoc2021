@@ -74,8 +74,13 @@ impl FromStr for Table {
 }
 
 impl Table {
-    fn every(&self) -> bool {
+    fn every_row(&self) -> bool {
         self.0.iter().all(|e| e.1)
+    }
+    fn toggle(&mut self, at: u8) {
+        for row in self.0.iter_mut() {
+            row.found_at(at)
+        }
     }
 }
 
