@@ -4,6 +4,9 @@ struct Elem(u8, bool);
 #[derive(Debug)]
 struct Row(Vec<Elem>, bool);
 
+#[derive(Debug)]
+struct Table(Vec<Row>, bool);
+
 fn main() {
     let content = include_str!("../input.test")
         .split("\n\n")
@@ -17,23 +20,26 @@ fn main() {
 
     let tables_raw = &content[1..];
 
-    let tables: Vec<Vec<Row>> = tables_raw
+    let tables: Vec<Table> = tables_raw
         .into_iter()
         .map(|&table| {
-            table
-                .split("\n")
-                .map(|row| {
-                    Row(
-                        row.split(" ")
-                            .filter_map(|elem| elem.parse::<u8>().ok())
-                            .map(|e| Elem(e, false))
-                            .collect::<Vec<Elem>>(),
-                        false,
-                    )
-                })
-                .collect::<Vec<Row>>()
+            Table(
+                table
+                    .split("\n")
+                    .map(|row| {
+                        Row(
+                            row.split(" ")
+                                .filter_map(|elem| elem.parse::<u8>().ok())
+                                .map(|e| Elem(e, false))
+                                .collect::<Vec<Elem>>(),
+                            false,
+                        )
+                    })
+                    .collect::<Vec<Row>>(),
+                false,
+            )
         })
-        .collect::<Vec<Vec<Row>>>();
+        .collect::<Vec<Table>>();
     println!("{:?}", tables);
     println!("{:?}", choosen_numbers);
 }
