@@ -2,12 +2,30 @@ use std::num::ParseIntError;
 use std::str::FromStr;
 
 #[derive(Debug)]
+struct ChoosenNumbers(Vec<u8>);
+
+impl FromStr for ChoosenNumbers {
+    type Err = ParseIntError;
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        Ok(ChoosenNumbers(
+            s.split(",").filter_map(|e| e.parse::<u8>().ok()).collect(),
+        ))
+    }
+}
+
+#[derive(Debug)]
 struct Elem(u8, bool);
 
 impl FromStr for Elem {
     type Err = ParseIntError;
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         Ok(Elem(s.parse::<u8>()?, false))
+    }
+}
+
+impl Elem {
+    fn found(&mut self) {
+        self.1 = true
     }
 }
 
@@ -26,6 +44,20 @@ impl FromStr for Row {
     }
 }
 
+impl Row {
+    fn found_at(&mut self, at: u8) {
+        for elem in self.0.iter_mut() {
+            if elem.0 == at {
+                elem.found()
+            }
+        }
+    }
+
+    fn full(&self) -> bool {
+        self.0.iter().all(|elem| elem.1)
+    }
+}
+
 #[derive(Debug)]
 struct Table(Vec<Row>, bool);
 
@@ -41,21 +73,24 @@ impl FromStr for Table {
     }
 }
 
+impl Table {
+    fn every(&self) -> bool {
+        self.0.iter().all(|e| e.1)
+    }
+}
+
 fn main() {
     let content = include_str!("../input.test")
         .split("\n\n")
         .collect::<Vec<&str>>();
 
-    let choosen_numbers = content[0]
-        .split(",")
-        .into_iter()
-        .filter_map(|e| e.parse::<u8>().ok())
-        .collect::<Vec<u8>>();
+    let choosen_numbers = ChoosenNumbers::from_str(content[0]);
 
     let tables: Vec<Table> = (&content[1..])
         .into_iter()
         .filter_map(|&table| Table::from_str(table).ok())
         .collect::<Vec<Table>>();
+
     println!("{:?}", tables);
     println!("{:?}", choosen_numbers);
 }
