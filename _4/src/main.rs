@@ -13,7 +13,7 @@ impl FromStr for ChoosenNumbers {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 struct Elem(u8, bool);
 
 impl FromStr for Elem {
@@ -29,7 +29,7 @@ impl Elem {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 struct Row(Vec<Elem>, bool);
 
 impl FromStr for Row {
@@ -58,7 +58,7 @@ impl Row {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 struct Table(Vec<Row>, bool);
 
 impl FromStr for Table {
@@ -75,7 +75,7 @@ impl FromStr for Table {
 
 impl Table {
     fn any_row(&self) -> bool {
-        self.0.iter().any(|e| e.1)
+        self.0.iter().any(|e| e.full())
     }
     fn toggle(&mut self, at: u8) {
         for row in self.0.iter_mut() {
@@ -83,7 +83,10 @@ impl Table {
         }
     }
     fn any_colum(&self) -> bool {
-        (0..self.0.len()).any(|i| self.every_of_column(i))
+        self.0
+            .iter()
+            .enumerate()
+            .any(|(i, _)| self.every_of_column(i))
     }
     fn every_of_column(&self, column: usize) -> bool {
         self.0.iter().all(|row| (row.0.get(column)).unwrap().1)
@@ -111,13 +114,20 @@ fn main() {
         .split("\n\n")
         .collect::<Vec<&str>>();
 
-    let choosen_numbers = ChoosenNumbers::from_str(content[0]);
+    let choosen_numbers = ChoosenNumbers::from_str(content[0]).unwrap();
 
-    let tables: Vec<Table> = (&content[1..])
+    let mut tables: Vec<Table> = (&content[1..])
         .into_iter()
-        .filter_map(|&table| Table::from_str(table).ok())
+        .filter_map(|&table| Table::from_str(table.trim()).ok())
         .collect::<Vec<Table>>();
 
-    println!("{:?}", tables);
-    println!("{:?}", choosen_numbers);
+    for number in choosen_numbers.0.iter() {
+        for table in tables.iter_mut() {
+            table.toggle(*number);
+            if table.found_full() {
+                println!("{:?}", table);
+                return;
+            }
+        }
+    }
 }
