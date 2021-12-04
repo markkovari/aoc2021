@@ -18,9 +18,7 @@ fn main() {
         .filter_map(|e| e.parse::<u8>().ok())
         .collect::<Vec<u8>>();
 
-    let tables_raw = &content[1..];
-
-    let tables: Vec<Table> = tables_raw
+    let tables: Vec<Table> = (&content[1..])
         .into_iter()
         .map(|&table| {
             Table(
