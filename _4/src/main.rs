@@ -85,9 +85,24 @@ impl Table {
     fn any_colum(&self) -> bool {
         (0..self.0.len()).any(|i| self.every_of_column(i))
     }
-
     fn every_of_column(&self, column: usize) -> bool {
         self.0.iter().all(|row| (row.0.get(column)).unwrap().1)
+    }
+    fn diagonal(&self) -> bool {
+        self.0
+            .iter()
+            .enumerate()
+            .all(|(i, row)| row.0.get(i).unwrap().1)
+    }
+    fn reverse_diagonal(&self) -> bool {
+        let row_size: usize = self.0.len();
+        self.0
+            .iter()
+            .enumerate()
+            .all(|(i, row)| row.0.get(row_size - i - 1).unwrap().1)
+    }
+    fn found_full(&self) -> bool {
+        self.any_colum() || self.any_row() || self.diagonal() || self.reverse_diagonal()
     }
 }
 
