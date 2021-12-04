@@ -74,13 +74,20 @@ impl FromStr for Table {
 }
 
 impl Table {
-    fn every_row(&self) -> bool {
-        self.0.iter().all(|e| e.1)
+    fn any_row(&self) -> bool {
+        self.0.iter().any(|e| e.1)
     }
     fn toggle(&mut self, at: u8) {
         for row in self.0.iter_mut() {
             row.found_at(at)
         }
+    }
+    fn any_colum(&self) -> bool {
+        (0..self.0.len()).any(|i| self.every_of_column(i))
+    }
+
+    fn every_of_column(&self, column: usize) -> bool {
+        self.0.iter().all(|row| (row.0.get(column)).unwrap().1)
     }
 }
 
