@@ -51,10 +51,21 @@ impl Row {
                 elem.found()
             }
         }
+        if self.full() {
+            self.1 = true
+        }
     }
 
     fn full(&self) -> bool {
         self.0.iter().all(|elem| elem.1)
+    }
+
+    fn get_unused(self) -> Vec<u128> {
+        self.0
+            .into_iter()
+            .filter(|elem| !elem.1)
+            .map(|elem| elem.0 as u128)
+            .collect()
     }
 }
 
@@ -75,9 +86,9 @@ impl FromStr for Table {
 
 impl Table {
     fn any_row(&self) -> bool {
-        self.0.iter().any(|e| e.full())
+        self.0.iter().any(|e| e.1)
     }
-    fn toggle(&mut self, at: u8) {
+    fn toggle(&mut self, at: u8) -> () {
         for row in self.0.iter_mut() {
             row.found_at(at)
         }
@@ -89,28 +100,22 @@ impl Table {
             .any(|(i, _)| self.every_of_column(i))
     }
     fn every_of_column(&self, column: usize) -> bool {
-        self.0.iter().all(|row| (row.0.get(column)).unwrap().1)
-    }
-    fn diagonal(&self) -> bool {
-        self.0
-            .iter()
-            .enumerate()
-            .all(|(i, row)| row.0.get(i).unwrap().1)
-    }
-    fn reverse_diagonal(&self) -> bool {
-        let row_size: usize = self.0.len();
-        self.0
-            .iter()
-            .enumerate()
-            .all(|(i, row)| row.0.get(row_size - i - 1).unwrap().1)
+        self.0.iter().all(|row| row.0.get(column).unwrap().1)
     }
     fn found_full(&self) -> bool {
-        self.any_colum() || self.any_row() || self.diagonal() || self.reverse_diagonal()
+        self.any_colum() || self.any_row()
+    }
+    fn get_unused_numbers(self) -> Vec<u128> {
+        self.0
+            .into_iter()
+            .map(|row| row.get_unused())
+            .flatten()
+            .collect()
     }
 }
 
 fn main() {
-    let content = include_str!("../input.test")
+    let content = include_str!("../input.data")
         .split("\n\n")
         .collect::<Vec<&str>>();
 
@@ -121,11 +126,22 @@ fn main() {
         .filter_map(|&table| Table::from_str(table.trim()).ok())
         .collect::<Vec<Table>>();
 
-    for number in choosen_numbers.0.iter() {
+    for number in choosen_numbers.0 {
         for table in tables.iter_mut() {
-            table.toggle(*number);
+            table.toggle(number);
             if table.found_full() {
-                println!("{:?}", table);
+                let missings = table
+                    .clone()
+                    .get_unused_numbers()
+                    .into_iter()
+                    .reduce(|a, b| a + b)
+                    .unwrap();
+                println!(
+                    "{} , {} -> {}",
+                    number,
+                    missings,
+                    (number as u128) * missings
+                );
                 return;
             }
         }
