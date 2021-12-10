@@ -1,3 +1,4 @@
+#![feature(drain_filter)]
 use std::num::ParseIntError;
 use std::str::FromStr;
 
@@ -115,7 +116,7 @@ impl Table {
 }
 
 fn main() {
-    let content = include_str!("../input.data")
+    let content = include_str!("../input.test")
         .split("\n\n")
         .collect::<Vec<&str>>();
 
@@ -125,25 +126,69 @@ fn main() {
         .into_iter()
         .filter_map(|&table| Table::from_str(table.trim()).ok())
         .collect::<Vec<Table>>();
-
+    let mut found_table_indicies: Vec<usize> = vec![];
+    // let tables_length = tables.len();
     for number in choosen_numbers.0 {
-        for table in tables.iter_mut() {
-            table.toggle(number);
-            if table.found_full() {
-                let missings = table
-                    .clone()
-                    .get_unused_numbers()
-                    .into_iter()
-                    .reduce(|a, b| a + b)
-                    .unwrap();
-                println!(
-                    "{} , {} -> {}",
-                    number,
-                    missings,
-                    (number as u128) * missings
-                );
-                return;
-            }
-        }
+        tables = tables
+            .drain_filter(|table| {
+                table.toggle(number);
+                table.found_full()
+            })
+            .collect();
+        // tables.retain(|table| (*table).found_full())
     }
+    // tables.retain(|table| {
+    //     (*table).toggle(number);
+    //     true
+    // })
+    // for (i, table) in tables.iter_mut().enumerate() {
+    //     table.toggle(number);
+    //     if table.found_full() && !found_table_indicies.contains(&i) {
+    //         println!("{:?} <-> {} ", table, number);
+    //         found_table_indicies.push(i);
+    //     }
+    //     table.delete();
+    // if found_table_indicies.len() == tables_length - 1 {
+    //     println!("{}", number);
+    //     let not_found_indicies = (0..tables_length)
+    //         .clone()
+    //         .filter(|idx| !found_table_indicies.contains(idx))
+    //         .collect::<Vec<usize>>();
+    //     let not_found_index = not_found_indicies.get(0).unwrap();
+    //     let missing_numbers = tables
+    //         .get(*not_found_index)
+    //         .unwrap()
+    //         .clone()
+    //         .get_unused_numbers();
+    //     let missings = missing_numbers
+    //         .clone()
+    //         .into_iter()
+    //         .reduce(|a, b| a + b)
+    //         .unwrap();
+    //     println!(
+    //         "{} , {}, {:?} -> {}",
+    //         number,
+    //         missings,
+    //         missing_numbers,
+    //         (number as u128) * missings
+    //     );
+    //     return;
+    // }
+    // if table.found_full() {
+    //     let missings = table
+    //         .clone()
+    //         .get_unused_numbers()
+    //         .into_iter()
+    //         .reduce(|a, b| a + b)
+    //         .unwrap();
+    //     println!(
+    //         "{} , {} -> {}",
+    //         number,
+    //         missings,
+    //         (number as u128) * missings
+    //     );
+    //     return;
+    // }
+    // }
+    // }
 }
